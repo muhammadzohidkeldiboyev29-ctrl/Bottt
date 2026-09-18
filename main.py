@@ -6,7 +6,6 @@ from flask import Flask
 import telebot
 from telebot import types
 
-# Tokeningiz avtomatik ravishda qo'yildi:
 TOKEN = "8346877991:AAGIXLwhJnNRuYOiF6tUVHe_BDfsmXkWVSE"
 ADMIN_ID = 8753350906
 
@@ -45,7 +44,22 @@ LANG_TEXTS = {
         "vip_choose_period": "💎 **O'zbekcha VIP Premium Obuna**\n\nMuddatni tanlang:",
         "card_info": "💳 **Karta raqami:** `6262 5701 4806 4381`\n👤 **Ism Familiya:** Obidjonova M.\n\n📥 To'lov qilib, chek rasmini shu botga yuboring!",
         "vip_ad_notice": "💎 *Agar VIP obunaga a'zo bo'lsangiz, hech qanday kanallarga obuna bo'lmasdan, reklamasiz va yuqori sifatda tomosha qilasiz!*",
-        "ad_footer": "\n\n━━━━━━━━━━━━━━━━━━━━━\n✨ **PREMERANING ENG ZO'R KINOLARI SIZ UCHUN!** ✨\n🚀 Kanalingizga obunachilar ko'paytirish va reklama berish:\n📢 **Murojaat:** @mhdnvwv"
+        "ad_footer": (
+            "\n\n━━━━━━━━━━━━━━━━━━━━━\n"
+            "🚀 **TELEGRAM KANALINGIZ O'SMAYAPTI?**\n"
+            "📢 Telegram kanal va guruhlaringizga AKTIV obunachilar yig'ib beramiz!\n\n"
+            "✅ Haqiqiy auditoriya\n"
+            "✅ Tezkor xizmat\n"
+            "✅ Sifat kafolati\n\n"
+            "• Garantiya - 😎🇺🇿\n"
+            "(Jvoy o'zbek obunachi)\n\n"
+            "1000 👥 obunachi - 90.000so'm\n"
+            "2000 👥 obunachi - 180.000so'm\n"
+            "3000 👥 obunachi - 270.000so'm\n"
+            "5000 👥 obunachi - 450.000so'm\n\n"
+            "🔥 Kanalingizni bugunoq rivojlantirishni boshlang!\n"
+            "📩 Admin: @mhdnvwv"
+        )
     },
     "ru": {
         "menu": "✅ Главное меню:",
@@ -62,7 +76,16 @@ LANG_TEXTS = {
         "vip_choose_period": "💎 **Русская VIP Премиум Подписка**\n\nВыберите срок:",
         "card_info": "💳 **Номер карты:** `6262 5701 4806 4381`\n👤 **ФИО:** Obidjonova M.\n\n📥 Сделайте перевод и отправьте скриншот чека сюда!",
         "vip_ad_notice": "💎 *Если у вас есть VIP подписка, вы смотрите без подписок на каналы, без рекламы и в высоком качестве!*",
-        "ad_footer": "\n\n━━━━━━━━━━━━━━━━━━━━━\n✨ **ЛУЧШИЕ КИНОПРЕМЬЕРЫ ДЛЯ ВАС!** ✨\n🚀 Реклама и продвижение каналов:\n📢 **Для связи:** @mhdnvwv"
+        "ad_footer": (
+            "\n\n━━━━━━━━━━━━━━━━━━━━━\n"
+            "🚀 **РАСКРУТКА В TELEGRAM**\n"
+            "📢 Живые и активные подписчики в ваши каналы!\n\n"
+            "1000 👥 подписчиков - 90.000 сум\n"
+            "2000 👥 подписчиков - 180.000 сум\n"
+            "3000 👥 подписчиков - 270.000 сум\n"
+            "5000 👥 подписчиков - 450.000 сум\n\n"
+            "📩 Админ: @mhdnvwv"
+        )
     },
     "en": {
         "menu": "✅ Main menu:",
@@ -79,7 +102,16 @@ LANG_TEXTS = {
         "vip_choose_period": "💎 **English VIP Premium Subscription**\n\nSelect period:",
         "card_info": "💳 **Card Number:** `6262 5701 4806 4381`\n👤 **Name:** Obidjonova M.\n\n📥 Make the payment and send the receipt screenshot here!",
         "vip_ad_notice": "💎 *If you have a VIP subscription, you watch without channel subscriptions, ad-free, and in high quality!*",
-        "ad_footer": "\n\n━━━━━━━━━━━━━━━━━━━━━\n✨ **BEST MOVIE PREMIERES FOR YOU!** ✨\n🚀 Channel promotion and advertising:\n📢 **Contact:** @mhdnvwv"
+        "ad_footer": (
+            "\n\n━━━━━━━━━━━━━━━━━━━━━\n"
+            "🚀 **TELEGRAM PROMOTION**\n"
+            "📢 Active subscribers for your channels!\n\n"
+            "1000 👥 subscribers - 90.000 UZS\n"
+            "2000 👥 subscribers - 180.000 UZS\n"
+            "3000 👥 subscribers - 270.000 UZS\n"
+            "5000 👥 subscribers - 450.000 UZS\n\n"
+            "📩 Admin: @mhdnvwv"
+        )
     }
 }
 
@@ -89,6 +121,7 @@ def init_db():
     cursor.execute("CREATE TABLE IF NOT EXISTS users (user_id INTEGER PRIMARY KEY, username TEXT, lang TEXT DEFAULT 'uz', joined_date TEXT, is_vip_uz INTEGER DEFAULT 0, is_vip_ru INTEGER DEFAULT 0, is_vip_en INTEGER DEFAULT 0, status TEXT DEFAULT 'active')")
     cursor.execute("CREATE TABLE IF NOT EXISTS movies (code TEXT PRIMARY KEY, video_id TEXT, is_vip INTEGER DEFAULT 0, downloads INTEGER DEFAULT 0)")
     cursor.execute("CREATE TABLE IF NOT EXISTS channels (id INTEGER PRIMARY KEY AUTOINCREMENT, channel_username TEXT)")
+    cursor.execute("CREATE TABLE IF NOT EXISTS custom_buttons (id INTEGER PRIMARY KEY AUTOINCREMENT, button_name TEXT, button_content TEXT)")
     conn.commit()
     conn.close()
 
@@ -123,6 +156,8 @@ def is_user_vip_for_lang(user_id, lang):
     return row[0] == 1 if row else False
 
 def check_channels_subscription(user_id):
+    if user_id == ADMIN_ID:
+        return True
     conn = get_db()
     cursor = conn.cursor()
     cursor.execute("SELECT channel_username FROM channels")
@@ -143,18 +178,13 @@ def check_channels_subscription(user_id):
 
 def show_vip_keyboard(lang):
     markup = types.InlineKeyboardMarkup()
-    if lang == 'uz':
-        markup.row(types.InlineKeyboardButton("O'zbekcha 1 oy — 13,000 so'm", callback_data="vip_uz_1"))
-        markup.row(types.InlineKeyboardButton("O'zbekcha 3 oy — 20,000 so'm", callback_data="vip_uz_3"))
-        markup.row(types.InlineKeyboardButton("O'zbekcha 6 oy — 32,000 so'm", callback_data="vip_uz_6"))
-    elif lang == 'ru':
-        markup.row(types.InlineKeyboardButton("Русский 1 месяц — 300 руб", callback_data="vip_ru_1"))
-        markup.row(types.InlineKeyboardButton("Русский 3 месяца — 420 руб", callback_data="vip_ru_3"))
-        markup.row(types.InlineKeyboardButton("Русский 6 месяцев — 550 руб", callback_data="vip_ru_6"))
-    else:
-        markup.row(types.InlineKeyboardButton("English 1 month — $12", callback_data="vip_en_1"))
-        markup.row(types.InlineKeyboardButton("English 3 months — $15", callback_data="vip_en_3"))
-        markup.row(types.InlineKeyboardButton("English 6 months — $22", callback_data="vip_en_6"))
+    periods = [
+        ("1 kunlik", "1d"), ("3 kunlik", "3d"), ("10 kunlik", "10d"),
+        ("1 oylik", "1"), ("3 oylik", "3"), ("6 oylik", "6"),
+        ("9 oylik", "9"), ("1 yillik", "12"), ("10 yillik", "120")
+    ]
+    for name, code in periods:
+        markup.row(types.InlineKeyboardButton(f"💎 {name} VIP ({lang.upper()})", callback_data=f"vip_{lang}_{code}"))
     return markup
 
 def get_movie_inline_buttons(lang):
@@ -183,6 +213,17 @@ def show_main_menu(chat_id, user_id):
     markup.row(t["search_btn"], t["random_btn"])
     markup.row(t["vip_btn"], t["lang_btn"])
     markup.row(t["ad_btn"])
+    
+    # Bazadan admin qo'shgan qo'shimcha tugmalarni olib menyuga qo'shamiz
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT id, button_name FROM custom_buttons")
+    custom_btns = c.fetchall()
+    conn.close()
+    
+    for btn_id, btn_name in custom_btns:
+        markup.row(btn_name)
+
     if user_id == ADMIN_ID:
         markup.row(t["settings_btn"])
     bot.send_message(chat_id, t["menu"], reply_markup=markup)
@@ -275,7 +316,7 @@ def callback_vip_period(call):
     lang = parts[1]
     period = parts[2]
     t = LANG_TEXTS[lang]
-    text = f"💎 **VIP Obuna ({lang.upper()} - {period} oy)**\n\n" + t["card_info"]
+    text = f"💎 **VIP Obuna ({lang.upper()} - {period})**\n\n" + t["card_info"]
     bot.answer_callback_query(call.id)
     bot.send_message(call.message.chat.id, text, parse_mode="Markdown")
 
@@ -357,6 +398,7 @@ def admin_settings_menu(m):
     markup.row("➕ Majburiy obuna", "🗑 Majburiy obunani o'chirish")
     markup.row("🎬 Kino qo'shish", "💎 VIP kino qo'shish")
     markup.row("🗑 Kino o'chirish")
+    markup.row("➕ Qo'shimcha tugma qo'shish", "🗑 Tugmani o'chirish")
     markup.row("⬅️ Asosiy menyu")
     bot.send_message(m.chat.id, "⚙️ Admin sozlamalari paneliga xush kelibsiz:", reply_markup=markup)
 
@@ -435,6 +477,63 @@ def remove_channel_callback(call):
     bot.answer_callback_query(call.id, "O'chirildi ✅")
     bot.edit_message_text("🗑 Tanlangan majburiy obuna kanali o'chirildi!", call.message.chat.id, call.message.message_id)
 
+# --- DINAMIK TUGMA QO'SHISH VA BOSHQARISH QISMI ---
+@bot.message_handler(func=lambda m: m.from_user.id == ADMIN_ID and m.text == "➕ Qo'shimcha tugma qo'shish")
+def add_custom_button_start(m):
+    user_states[m.from_user.id] = {'state': 'waiting_for_button_name'}
+    bot.reply_to(m, "➕ Yangi tugma nomini yuboring (masalan: `🎁 Konkurs` yoki `🔥 Aksiya`):")
+
+@bot.message_handler(func=lambda m: m.from_user.id == ADMIN_ID and user_states.get(m.from_user.id, {}).get('state') == 'waiting_for_button_name')
+def get_custom_button_name(m):
+    user_states[m.from_user.id]['button_name'] = m.text.strip()
+    user_states[m.from_user.id]['state'] = 'waiting_for_button_content'
+    bot.reply_to(m, "✅ Tugma nomi qabul qilindi.\n\nEndi foydalanuvchi shu tugmani bosganda chiqadigan **matn, shartlar yoki e'lonni** yuboring:")
+
+@bot.message_handler(func=lambda m: m.from_user.id == ADMIN_ID and user_states.get(m.from_user.id, {}).get('state') == 'waiting_for_button_content')
+def get_custom_button_content(m):
+    content = m.text.strip()
+    data = user_states.get(m.from_user.id, {})
+    btn_name = data.get('button_name')
+    
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("INSERT INTO custom_buttons (button_name, button_content) VALUES (?, ?)", (btn_name, content))
+    conn.commit()
+    conn.close()
+    
+    bot.reply_to(m, f"🎉 Yangi `{btn_name}` tugmasi muvaffaqiyatli qo'shildi va menyuda chiqdi!", parse_mode="Markdown")
+    user_states[m.from_user.id] = {}
+
+@bot.message_handler(func=lambda m: m.from_user.id == ADMIN_ID and m.text == "🗑 Tugmani o'chirish")
+def delete_custom_button_list(m):
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT id, button_name FROM custom_buttons")
+    buttons = c.fetchall()
+    conn.close()
+    
+    if not buttons:
+        bot.reply_to(m, "❌ Hozircha qo'shimcha tugmalar mavjud emas.")
+        return
+        
+    markup = types.InlineKeyboardMarkup()
+    for b_id, b_name in buttons:
+        markup.row(types.InlineKeyboardButton(f"❌ O'chirish: {b_name}", callback_data=f"del_btn_{b_id}"))
+    bot.reply_to(m, "🗑 O'chirmoqchi bo'lgan tugmangizni tanlang:", reply_markup=markup)
+
+@bot.callback_query_handler(func=lambda call: call.data.startswith('del_btn_'))
+def remove_custom_button_callback(call):
+    if call.from_user.id != ADMIN_ID:
+        return
+    b_id = int(call.data.split('_')[2])
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("DELETE FROM custom_buttons WHERE id = ?", (b_id,))
+    conn.commit()
+    conn.close()
+    bot.answer_callback_query(call.id, "Tugma o'chirildi ✅")
+    bot.edit_message_text("🗑 Tanlangan tugma menyudan olib tashlandi!", call.message.chat.id, call.message.message_id)
+
 @bot.message_handler(func=lambda m: m.from_user.id == ADMIN_ID and m.text == "🗑 Kino o'chirish")
 def delete_movie_start(m):
     user_states[m.from_user.id] = {'state': 'waiting_for_delete_code'}
@@ -492,13 +591,13 @@ def process_user_random_request(chat_id, user_id):
     
     is_vip_current = is_user_vip_for_lang(user_id, lang)
 
-    if user_id != ADMIN_ID and not is_vip_current and not check_channels_subscription(user_id):
+    if not is_vip_current and not check_channels_subscription(user_id):
         send_subscription_prompt(chat_id, lang)
         return
 
     conn = get_db()
     c = conn.cursor()
-    if is_vip_current:
+    if is_vip_current or user_id == ADMIN_ID:
         c.execute("SELECT code, video_id, downloads FROM movies")
     else:
         c.execute("SELECT code, video_id, downloads FROM movies WHERE is_vip = 0")
@@ -530,12 +629,28 @@ EXCLUDED_BTNS = [
     "🔍 Qidirish", "🔍 Поиск", "🔍 Search", "💎 Premium Obuna", "💎 VIP Подписка", "💎 VIP Subscription",
     "📢 Reklama", "📢 Реклама", "📢 Ads", "🌐 Tilni o'zgartirish", "🌐 Сменить язык", "🌐 Language",
     "⚙️ Nastroyka (Admin)", "⚙️ Настройки (Админ)", "⚙️ Settings (Admin)",
-    "➕ Majburiy obuna", "🗑 Majburiy obunani o'chirish", "🎬 Kino qo'shish", "💎 VIP kino qo'shish", "🗑 Kino o'chirish", "⬅️ Asosiy menyu"
+    "➕ Majburiy obuna", "🗑 Majburiy obunani o'chirish", "🎬 Kino qo'shish", "💎 VIP kino qo'shish", "🗑 Kino o'chirish",
+    "➕ Qo'shimcha tugma qo'shish", "🗑 Tugmani o'chirish", "⬅️ Asosiy menyu"
 ]
 
 @bot.message_handler(func=lambda m: m.text and not m.text.startswith('/') and m.text not in EXCLUDED_BTNS)
-def handle_text_codes(message):
-    process_user_movie_request(message.chat.id, message.from_user.id, message.text.strip())
+def handle_text_codes_or_custom_buttons(message):
+    text = message.text.strip()
+    
+    # Avval admin qo'shgan maxsus tugma bosilganligini tekshiramiz
+    conn = get_db()
+    c = conn.cursor()
+    c.execute("SELECT button_content FROM custom_buttons WHERE button_name = ?", (text,))
+    row = c.fetchone()
+    conn.close()
+    
+    if row:
+        # Agar maxsus tugma bosilgan bo'lsa, uning ichidagi matnni chiqaramiz
+        bot.send_message(message.chat.id, row[0], parse_mode="Markdown")
+        return
+        
+    # Aks holda kino kodi deb tushunib qidiramiz
+    process_user_movie_request(message.chat.id, message.from_user.id, text)
 
 def send_subscription_prompt(chat_id, lang):
     t = LANG_TEXTS[lang]
@@ -561,7 +676,7 @@ def process_user_movie_request(chat_id, user_id, code):
     
     is_vip_current = is_user_vip_for_lang(user_id, lang)
 
-    if user_id != ADMIN_ID and not is_vip_current and not check_channels_subscription(user_id):
+    if not is_vip_current and not check_channels_subscription(user_id):
         send_subscription_prompt(chat_id, lang)
         return
 
@@ -595,4 +710,3 @@ def process_user_movie_request(chat_id, user_id, code):
 if __name__ == "__main__":
     keep_alive()
     bot.infinity_polling()
-
